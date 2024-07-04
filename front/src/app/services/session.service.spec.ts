@@ -85,4 +85,5 @@ describe('SessionService', () => {
       service.logOut();
     });
   });
+
 });

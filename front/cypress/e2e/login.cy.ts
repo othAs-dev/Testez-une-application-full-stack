@@ -1,58 +1,54 @@
 /// <reference types="Cypress" />
-describe('Login spec', () => {
-  const user = {
-    id: 1,
-    email: 'email@test.com',
-    firstName: 'Emma',
-    lastName: 'Lee',
-    password: 'pass!1234',
-    admin: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+import { adminUser } from "./constants/constants";
 
-  beforeEach(() => {
-    cy.visit('/login');
-  });
+describe('Login', () => {
 
   it('should login successfully', () => {
+    cy.visit('/login');
+
     cy.intercept('POST', '/api/auth/login', {
-      statusCode: 201,
-      body: user,
+      body: adminUser,
     });
 
-    cy.intercept('GET', '/api/session', {
-      statusCode: 200,
-      body: [],
-    }).as('session');
+    cy.intercept('GET', '/api/session', []).as('session');
 
-    cy.get('input[formControlName=email]').type(user.email)
-    cy.get('input[formControlName=password]').type(`${user.password}{enter}{enter}`)
-
-    cy.url().should('eq', `${Cypress.config().baseUrl}sessions`);
-
-    cy.get('.error').should('not.exist')
+    cy.get('input[formControlName=email]').type("yoga@studio.com");
+    cy.get('input[formControlName=password]').type(`${"test!1234"}{enter}{enter}`);
+    cy.url().should('include', '/sessions');
   })
 
-  it('should not login with incorrect email', () => {
-    cy.get('input[formControlName=email]').type("wrong@studio.com")
-    cy.get('input[formControlName=password]').type(`${user.password}{enter}{enter}`)
-
-    cy.get('.error').should('contain', 'An error occurred')
-  })
-
-  it('should not login with incorrect password', () => {
-    cy.get('input[formControlName=email]').type(user.email)
-    cy.get('input[formControlName=password]').type(`wrong-password{enter}{enter}`)
-
-    cy.get('.error').should('contain', 'An error occurred')
-  })
+  it('should logout successfully', () => {
+    cy.url().should('include', '/sessions');
+    cy.get('.mat-toolbar > .ng-star-inserted > :nth-child(3)').click();
+    cy.url().should('not.contain', '/sessions');
+  });
 
 
-  it('should not login with missing credentials', () => {
-    cy.get('input[formControlName=email]').type(user.email)
-    cy.get('input[formControlName=password]').type(`{enter}{enter}`)
+  it('should disable submit button if email field is empty', () => {
+    cy.visit('/login');
+    cy.get('input[formControlName=email]').clear;
+    cy.get('input[formControlName=password]').type(`${"wrongpass"}{enter}{enter}`);
+    cy.get('input[formControlName=email]').should('have.class', 'ng-invalid');
+    cy.get('.error').should('be.visible');
+    cy.get('button[type=submit]').should('be.disabled');
+  });
 
-    cy.get('.error').should('contain', 'An error occurred')
-  })
+
+  it('should not login with bad credentials', () => {
+    cy.visit('/login');
+    cy.get('input[formControlName=email]').type("yoga@studio.com");
+    cy.get('input[formControlName=password]').type(`${"test!4321"}{enter}{enter}`);
+    cy.url().should('not.contain', '/sessions');
+    cy.get('.error').should('be.visible');
+  });
+
+  it('should disable submit button if password field is empty', () => {
+    cy.visit('/login');
+    cy.get('input[formControlName=password]').clear;
+    cy.get('input[formControlName=email]').type(`${"yoga@studio.com"}{enter}{enter}`);
+    cy.get('input[formControlName=password]').should('have.class', 'ng-invalid');
+    cy.get('.error').should('be.visible');
+    cy.get('button[type=submit]').should('be.disabled');
+  });
+
 });

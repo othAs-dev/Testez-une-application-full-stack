@@ -134,8 +134,11 @@
 				<version>0.8.5</version>
 				<configuration>
 					<excludes>
+						<exclude>**/models/**</exclude>
+						<exclude>**/dto/**</exclude>
 						<exclude>**/mapper/*MapperImpl.class</exclude>
-						<exclude>com/openclassrooms/starterjwt/dto/**</exclude>
+						<exclude>**/SpringBootSecurityJwtApplication.class</exclude>
+						<exclude>**/payload/request/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>
@@ -169,10 +172,7 @@
 							<rules>
 								<rule>
 									<element>BUNDLE</element>
-									<excludes>
-										<exclude>**/mapper/*MapperImpl.class</exclude>
-										<exclude>com/openclassrooms/starterjwt/dto/**</exclude>
-									</excludes>
+
 									<limits>
 										<limit>
 											<counter>INSTRUCTION</counter>
